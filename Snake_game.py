@@ -3,17 +3,22 @@ from random import randrange
 
 
 class Cube:
-    def __init__(self, x, y):
+    def __init__(self, x, y, color):
         self.x = x
         self.y = y
-        draw.rect(window, WHITE, (
+        draw.rect(window, color, (
             self.x * height // number_of_rect, self.y * width // number_of_rect, height // number_of_rect - 2,
             width // number_of_rect - 2))
 
     def change_color(self, color):
-        draw.rect(window, color, (
-            self.x * height // number_of_rect, self.y * width // number_of_rect, height // number_of_rect - 2,
-            width // number_of_rect - 2))
+        draw.rect(window, color, (self.x * height // number_of_rect, self.y * width // number_of_rect, height // number_of_rect - 2,width // number_of_rect - 2))
+    def head_cube(self):
+        draw.rect(window, GREEN, (self.x * height // number_of_rect, self.y * width // number_of_rect, height // number_of_rect - 2,width // number_of_rect - 2))
+        draw.circle(window, BLACK, (self.x * height//number_of_rect+height//(number_of_rect*4), self.y*width//number_of_rect+width//(number_of_rect*4)), height//(number_of_rect*8))
+        draw.circle(window, BLACK, ((self.x+1)* height//number_of_rect-height//(number_of_rect*4), self.y*width//number_of_rect+width//(number_of_rect*4)), height//(number_of_rect*8))
+    def food_cube(self):
+        draw.rect(window, BLACK, (self.x * height // number_of_rect, self.y * width // number_of_rect, height // number_of_rect - 2,width // number_of_rect - 2))
+        draw.circle(window, RED, (self.x*(height//number_of_rect)+(height//number_of_rect//2), self.y*(width//number_of_rect)+(width//number_of_rect//2)), height//(number_of_rect*2)-2)
 
 
 def create_food():
@@ -22,7 +27,7 @@ def create_food():
     y = randrange(0, number_of_rect)
     if [x, y] not in snake:
         food = [x, y]
-        cubes[x][y].change_color(RED)
+        cubes[x][y].food_cube()
     else:
         create_food()
 
@@ -32,20 +37,26 @@ def first():
     window = display.set_mode((height, width))
     display.set_caption("SNAKE GAME")
     cubes = []
+    color = [int(x) for x in input("Enter RBG seperated by space for initial backgound").split()]
     for i in range(number_of_rect):
         cubes.append([])
     for i in range(number_of_rect):
         for j in range(number_of_rect):
-            cubes[i].append(Cube(i, j))
+            cubes[i].append(Cube(i, j, color))
     create_food()
     for i in range(len(snake)):
         cubes[snake[i][0]][snake[i][1]].change_color(BROWN)
     running = True
     while running:
+        if score == number_of_rect * number_of_rect:
+            print("score:", score)
+            print("winner of the snake GAME")
         for even in event.get():
             if even.type == QUIT:
                 running = False
                 quit()
+            if even.type == MOUSEBUTTONDOWN:
+                print(even.pos)
             if even.type == KEYDOWN:
                 if even.key == 276 and not direction[0]:
                     direction = [0, 1, 0, 0]  # 'left'
@@ -87,14 +98,16 @@ def first():
                 temp[0] = 0
             else:
                 temp[0] += 1
-        cubes[temp[0]][temp[1]].change_color(BROWN)
+        cubes[temp[0]][temp[1]].head_cube()
         snake.insert(0, temp)
+        if score >= 2:
+            cubes[snake[1][0]][snake[1][1]].change_color(GREEN)
         display.update()
 
 
 direction = [1, 0, 0, 0]
 food = None
-number_of_rect = int(input("Enter number of cubes in each row:")) # setting number of cubes in each row and column
+number_of_rect =  40 #int(input("Enter number of cubes in each row:")) # setting number of cubes in each row and column
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
